@@ -1,0 +1,86 @@
+---
+title: "Mahalanobis Distance"
+author: "Kevin Sanchez"
+date: "5/19/2020"
+updated: "4/13/2021"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+This function calculates the Mahalanobis distance between two experimental groups.
+``` {r}
+mahala <- function(m1, m2) {
+  m1v <- as.matrix(m1)
+  m2v <- as.matrix(m2)
+  
+  mat1 <- matrix(m1v, ncol = ncol(m1v), dimnames = NULL)
+  mat2 <- matrix(m2v, ncol = ncol(m2v), dimnames = NULL)
+  
+  mat1.1 <- scale(mat1, center = T, scale = F)
+  mat2.1 <- scale(mat2, center = T, scale = F)
+
+  mat1.2 <- cov(mat1.1, method = "pearson")
+  mat2.2 <- cov(mat2.1, method = "pearson")
+
+  n1 <- nrow(mat1)
+  n2 <- nrow(mat2)
+  n3 <- n1 + n2
+
+  mat3 <- ((n1 / n3) * mat1.2) + ((n2 / n3) * mat2.2)
+  mat4 <- solve(mat3)
+  mat5 <- as.matrix((colMeans(mat1) - colMeans(mat2)))
+  mat6 <- t(mat5) %*% mat4
+  
+  a <- sqrt(mat6 %*% mat5)
+  b <- qchisq(0.95, df = ncol(m1) - 1)
+  c <- pchisq(a, df = ncol(m1) - 1, lower.tail = FALSE)
+  d <- ifelse(a > b, "Yes", "No")
+  e <- rbind(c(a, b, c, d))
+  colnames(e) = c('Mahalanobis Distance','Critical Value', 'p-Value',
+                  'Significant?')
+  f <- as.data.frame(e)
+  f
+}
+```
+
+This function calculates the Mahalanobis distance between six different groups
+(15 different possible combinations).
+``` {r}
+mahala_all_6 <- function(d1, d2, d3, d4, d5, d6) {
+  a <- mahala(d1, d2)
+  b <- mahala(d1, d3)
+  c <- mahala(d1, d4)
+  d <- mahala(d1, d5)
+  e <- mahala(d1, d6)
+  f <- mahala(d2, d3)
+  g <- mahala(d2, d4)
+  h <- mahala(d2, d5)
+  i <- mahala(d2, d6)
+  j <- mahala(d3, d4)
+  k <- mahala(d3, d5)
+  l <- mahala(d3, d6)
+  m <- mahala(d4, d5)
+  n <- mahala(d4, d6)
+  o <- mahala(d5, d6)
+  p <- rbind(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+  q <- as.data.frame(p)
+  q
+}
+```
+
+This function calculates the Mahalanobis distance between four different groups (6
+different possible combinations).
+``` {r}
+mahala_all_4 <- function(d1, d2, d3, d4) {
+  a <- mahala(d1, d2)
+  b <- mahala(d1, d3)
+  c <- mahala(d1, d4)
+  d <- mahala(d2, d3)
+  e <- mahala(d2, d4)
+  f <- mahala(d3, d4)
+  g <- rbind(a, b, c, d, e, f)
+  h <- as.data.frame(g)
+  h
+}
+```
